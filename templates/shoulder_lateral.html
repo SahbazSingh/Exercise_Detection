@@ -1,0 +1,90 @@
+{% extends 'base.html' %}
+{% block title %}
+Shoulder Lateral Raise Detection
+{% endblock title %}
+{% block head %}
+
+<h1>Shoulder Exercise Detection</h1>
+<h2>Select the exercise type</h2>
+
+<div class="container mt-2">
+    <div class="row">
+        <div class="col-md-3">
+            <!-- Exercise selection buttons -->
+            <div class="btn-group-vertical mb-3" role="group" aria-label="Shoulder Exercises">
+                <button type="button" class="btn btn-secondary exercise-btn" data-exercise="lateral_raise">Lateral Raise</button>
+                <button type="button" class="btn btn-secondary exercise-btn" data-exercise="front_raise">Front Raise</button>
+                <button type="button" class="btn btn-secondary exercise-btn" data-exercise="rear_delt_fly">Rear Delt Fly</button>
+                <button type="button" class="btn btn-secondary exercise-btn" data-exercise="shrugs">Shrugs</button>
+                <button type="button" class="btn btn-secondary exercise-btn" data-exercise="overhead_press">Overhead Press</button>
+            </div>
+        </div>
+        <div class="col-md-6">
+            {% for message in messages %}
+            <div class="alert alert-{{message.tags}} alert-dismissible fade show" role="alert">
+              <strong></strong> {{message}}
+              <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+            {% endfor %}
+            
+            <!-- Form for video file upload, initially hidden -->
+            <form id="video-upload-form" action="{% url 'process_shoulder_raise_video' %}" method="post" enctype="multipart/form-data" style="display: none;">
+                {% csrf_token %}
+                <input type="file" id="videoFile" name="videoFile" accept="video/*" style="display: none;" onchange="handleFiles(this.files)" required>
+                <label for="videoFile" class="form-group drop-area btn btn-primary" style="border: 2px dashed #ccc; border-radius: 5px; padding: 20px; text-align: center; cursor: pointer; display: block;">
+                    <img src="static/assets/img/upload.png" width="50" height="50">
+                    <br><br>
+                    <p style="color: white;">Upload an MP4 video file by clicking</p>
+                </label>
+                <div class="d-grid gap-2 mt-3">
+                    <button type="submit" class="btn btn-warning">Process Video</button>
+                </div>
+            </form>
+        </div>
+        <div class="col-md-3"></div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const buttons = document.querySelectorAll('.exercise-btn');
+    const videoForm = document.getElementById('video-upload-form');
+
+    buttons.forEach(button => {
+        button.addEventListener('click', function() {
+            buttons.forEach(btn => btn.classList.remove('btn-info'));
+            this.classList.add('btn-info');
+
+            // Manage availability and action of the form
+            if (this.dataset.exercise === 'lateral_raise') {
+                videoForm.style.display = 'block';
+                videoForm.action = `{% url 'process_shoulder_raise_video' %}`;
+            } else {
+                videoForm.style.display = 'none';
+                alert(this.dataset.exercise + " is not available yet.");
+            }
+        });
+    });
+});
+
+function handleFiles(files) {
+    for (let i = 0; i < files.length; i++) {
+        if (!files[i].type.startsWith('video/')) {
+            continue;
+        }
+        console.log('Ready for upload:', files[i].name);
+    }
+}
+</script>
+<style>
+.drop-area {
+    cursor: pointer;
+    height: 200px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+}
+</style>
+
+{% endblock head %}

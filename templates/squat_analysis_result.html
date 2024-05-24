@@ -1,0 +1,73 @@
+{% extends 'base2.html' %}
+{% load static %}
+
+{% block title %}Squat Analysis Results{% endblock %}
+
+{% block hero_content %}
+<div class="results-overlay" style="text-align: left;">
+    <h2 class="text-light">Analysis Outcome</h2>
+    {% if result %}
+        <div class="alert alert-success" role="alert">
+            <div>
+                <p><strong>Total Squats Performed:</strong> {{ result.total_squats }}</p>
+                <p><strong>Total Error Images Detected:</strong> {{ errors|length }}</p>
+            </div>
+            <div class="alert alert-success" role="alert">
+                <p>{{ result.feedback }}</p>
+                <button onclick="showSection('errorSection')" class="btn btn-danger">Show Errors</button>
+                <button onclick="showSection('videoSection')" class="btn btn-primary">Show Video</button>
+            </div>
+        </div>
+    {% else %}
+        <p class="text-light">Result data is not available.</p>
+    {% endif %}
+
+    <!-- Errors Section, initially hidden -->
+    <div id="errorSection" style="display: none;">
+        <h3 class="text-light mt-4">Detected Errors</h3>
+        {% if errors %}
+            {% for error in errors %}
+                <div class="mt-4 text-light">
+                    <p><strong>Error detected at:</strong> {{ error.timestamp }} seconds</p>
+                    <p><strong>Error Type:</strong> {{ error.type }}</p>
+                    {% if error.frame_filename %}
+                        <img src="{{ error.frame_filename }}" alt="Error Frame" style="max-width: 100%; height: auto;">
+                    {% else %}
+                        <p>Frame for this error is not available.</p>
+                    {% endif %}
+                </div>
+            {% endfor %}
+        {% else %}
+            <p class="text-light">No errors detected.</p>
+        {% endif %}
+    </div>
+
+    <!-- Video Section, initially hidden -->
+    <div id="videoSection" style="display: none;">
+        <h3 class="text-light mt-4">Processed Video</h3>
+        {% if video_url %}
+            <div class="video-responsive">
+                <video controls style="max-width: 100%; height: auto;">
+                    <source src="{{ video_url }}" type="video/mp4">
+                    Your browser does not support the video tag.
+                </video>
+            </div>
+        {% else %}
+            <p class="text-light">Processed video is not available.</p>
+        {% endif %}
+    </div>
+</div>
+
+<script>
+function showSection(id) {
+    var sections = ['errorSection', 'videoSection'];
+    sections.forEach(function(section) {
+        if (section === id) {
+            document.getElementById(section).style.display = 'block';
+        } else {
+            document.getElementById(section).style.display = 'none';
+        }
+    });
+}
+</script>
+{% endblock hero_content %}
